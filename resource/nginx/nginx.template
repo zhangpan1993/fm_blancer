@@ -1,7 +1,7 @@
 ##
 # Config ID : {{ config_id }}
 ##
-user www-data;
+user tengine;
 {%- if worker_processes == 0 %}
 worker_processes auto;
 {%- else %}
@@ -59,6 +59,11 @@ http {
 
     req_status_zone server "$host,$server_addr:$server_port" 32M;
     #req_status_zone_add_indicator server $limit;
+    req_status_zone server_name $server_name 256k;
+    req_status_zone server_addr $server_addr 256k;
+    req_status_zone server_url $server_name$uri 256k;
+    req_status server_name server_addr server_url;
+
 
     server {
         listen 80 default;
@@ -73,7 +78,7 @@ http {
             deny all;
         }
         location /req_status {
-            req_status_show;
+            req_status_show on;
             #req_status_show_field req_total $limit;
             allow 127.0.0.1;
             deny all;
