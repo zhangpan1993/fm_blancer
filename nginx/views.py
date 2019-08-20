@@ -10,7 +10,7 @@ import psutil
 import requests
 # Create your views here.
 
-
+#清除nginx下的目录
 def clean_dir(dir_path):
     filelist = []
     filelist = os.listdir(dir_path)
@@ -23,6 +23,7 @@ def clean_dir(dir_path):
 
     return True
 
+#导入nginx的配置模板
 def load_template(template):
 
     env = Environment(
@@ -35,29 +36,35 @@ def load_template(template):
 
     return env.get_template(template)
 
+
+#构建nginx的配置文件nginx.conf
 def build_main_config(config):
 
     template = load_template('nginx.template')
 
     return template.render(config)
 
+#导入代理配置文件
 def build_proxy_config(config):
 
     template = load_template('proxy.template')
 
     return template.render(config)
 
+#构建默认配置
 def build_default_config(config):
 
     template = load_template('default.template')
 
     return template.render(config)
 
+#写入配置文件
 def write_config(conf_path,conf_context):
 
     with open(conf_path,'w') as f:
         f.write(conf_context)
 
+#shell命令运行
 def run_shell(cmd):
 
     (status,output) = getstatusoutput(cmd)
@@ -69,9 +76,11 @@ def run_shell(cmd):
 
     return context
 
+#nginx功能测试
 def test_config():
     return run_shell('nginx -t')
 
+#重置代理配置
 def reload_config():
     config_nginx_path = "/etc/nginx/conf/nginx.conf"
     config_default_path = "/etc/nginx/conf/nginx.conf.default"
@@ -105,6 +114,7 @@ def reload_config():
 
     return run_shell('nginx -s reload')
 
+#获取系统状态
 def get_sys_status():
 
     phymem = psutil.virtual_memory()
@@ -168,7 +178,7 @@ def get_sys_status():
 
     return statusinfo
 
-
+#获取系统信息
 def get_sys_info():
     disk_info = psutil.disk_usage('/')
     nic_info = []
@@ -188,16 +198,17 @@ def get_sys_info():
     }
     return sysinfo
 
+#url请求函数
 def post_request(url,headers = {}):
     resp = requests.get(url,timeout=1,headers=headers)
     return resp
 
-
+#获取HTTP代理状态
 def get_proxy_http_status():
     url = "http://127.0.0.1/up_status?format=json"
     ret = post_request(url).json()
     return ret
-
+#获取代理连接情况
 def get_req_status():
     url = "http://127.0.0.1/req_status"
     req_status = post_request(url).text
